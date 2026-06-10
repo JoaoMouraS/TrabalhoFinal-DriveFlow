@@ -1,0 +1,49 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Cliente" as cli
+actor "Administrador" as adm
+actor "Gateway Pagamento" as pay <<Service>>
+
+rectangle "DriveFlow Ecosystem" {
+    package "Contexto: Customer & Auth" {
+        usecase "UC-01: Autenticar Usuário" as uc01
+        usecase "UC-02: Cadastrar Cliente" as uc02
+        usecase "UC-03: Gerenciar Perfil" as uc03
+    }
+    
+    package "Contexto: Fleet & Vehicle" {
+        usecase "UC-04: Manter Veículos (CRUD)" as uc04
+        usecase "UC-05: Consultar Catálogo" as uc05
+        usecase "UC-06: Registrar Manutenção" as uc06
+    }
+    
+    package "Contexto: Rental & Billing" {
+        usecase "UC-07: Solicitar Reserva" as uc07
+        usecase "UC-08: Cancelar Reserva" as uc08
+        usecase "UC-09: Processar Pagamento" as uc09
+        usecase "UC-10: Check-out (Retirada)" as uc10
+        usecase "UC-11: Check-in (Devolução)" as uc11
+        usecase "UC-12: Emitir Relatórios" as uc12
+    }
+}
+
+cli --> uc01
+cli --> uc02
+cli --> uc03
+cli --> uc05
+cli --> uc07
+cli --> uc08
+
+adm --> uc01
+adm --> uc04
+adm --> uc06
+adm --> uc08
+adm --> uc10
+adm --> uc11
+adm --> uc12
+
+uc09 --> pay
+uc07 ..> uc09 : <<include>>
+@enduml
