@@ -1,0 +1,38 @@
+@startuml
+actor Administrador as adm
+participant "Interface de Check-in (Frontend)" as ui
+participant "RentalController (Backend)" as backend
+database "Banco de Dados (Rental DB)" as db
+
+adm -> ui : 1: Insere dados da vistoria (km, avarias) e clica em "Finalizar Devolução"
+activate ui
+
+ui -> backend : 2: PUT /api/rentals/{id}/check-in (kmFinal, avarias, nivelCombustivel)
+activate backend
+
+backend -> db : 3: Buscar reserva ativa por ID
+activate db
+db --> backend : Retorna dados da reserva e datas do contrato
+deactivate db
+
+backend -> backend : 4: Calcular taxas extras (atraso/combustível) e validar contrato
+
+alt [Reserva Não Encontrada ou Já Encerrada]
+    backend --> ui : 404 Not Found (Erro: Contrato Inválido)
+    ui --> adm : Exibe mensagem de erro: "Locação ativa não localizada"
+    
+else [Contrato Ativo e Válido]
+    backend -> backend : 5: Atualizar status do contrato para FINALIZADA
+    
+    backend -> db : 6: Persistir dados do fechamento e logs de vistoria
+    activate db
+    db --> backend : Confirmação de alteração e persistência dos dados
+    deactivate db
+    
+    backend --> ui : 200 OK (dadosReservaFinalizada)
+    ui --> adm : Redireciona para a tela de resumo de encerramento do contrato
+end
+
+deactivate backend
+deactivate ui
+@enduml
