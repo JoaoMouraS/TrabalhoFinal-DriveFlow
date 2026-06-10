@@ -1,0 +1,55 @@
+@startuml 
+
+skinparam defaultTextAlignment center 
+
+skinparam packageStyle rectangle 
+
+  
+
+node "Dispositivo do Usuário (Client Side)" as client_node { 
+
+    node "Navegador Web (Chrome / Firefox / Edge)" { 
+
+        artifact "DriveFlow Frontend\n(React SPA Static Build)" as art_front 
+
+    } 
+
+} 
+
+  
+
+node "Servidor de Aplicação Cloud (Application Server)" as app_server_node { 
+
+    node "Ambiente de Execução Java (JRE 17)" { 
+
+        node "Servidor HTTP Embutido (Tomcat)" { 
+
+            artifact "driveflow-api.jar\n(Spring Boot Core)" as art_back 
+
+        } 
+
+    } 
+
+} 
+
+  
+
+node "Servidor de Banco de Dados (Database Server)" as db_server_node { 
+
+    node "Sistema Gerenciador (SGBD)" { 
+
+        database "driveflow_db\n(PostgreSQL Instance)" as db_inst 
+
+    } 
+
+} 
+
+  
+
+art_front -down-> art_back : HTTPS / JSON\n(Porta de Conexão: 443 / 8080) 
+
+art_back -down-> db_inst : Protocolo TCP/IP (JDBC)\n(Porta de Conexão: 5432) 
+
+  
+
+@enduml 

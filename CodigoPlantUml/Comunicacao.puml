@@ -1,0 +1,62 @@
+@startuml DriveFlow_Comunicacao_Integrada
+' Configurações de layout para evitar sobreposição de textos
+skinparam nodesep 140
+skinparam ranksep 120
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam object {
+    BackgroundColor White
+    ArrowColor #333333
+    BorderColor #555555
+}
+
+title Diagrama de Comunicação Integrado - Sistema DriveFlow
+
+' ==========================================
+' DEFEINIÇÃO DOS OBJETOS (PARTICIPANTES)
+' ==========================================
+
+' Atores
+object "<u>:Cliente</u>" as cli
+object "<u>:Administrador</u>" as adm
+
+' Camada de Apresentação (Unificada para limpeza visual)
+object "<u>:InterfaceReactSPA</u>" as ui
+
+' Módulos Indiretos (Satélites)
+object "<u>:ModuloAutenticacao</u>" as mod_auth
+object "<u>:ModuloGestaoFrota</u>" as mod_frota
+
+' Camada de Aplicação - PARTE PRINCIPAL (Detalahda)
+object "<u>:RentalController</u>" as ctrl
+object "<u>:LocacaoService</u>" as svc
+object "<u>:PagamentoService</u>" as pag
+object "<u>:GatewayExterno</u>" as gateway
+
+' Camada de Dados (Unificada para convergência limpa)
+object "<u>:BancoDeDados</u>" as db
+
+' ==========================================
+' CONEXÕES E FLUXOS DE MENSAGENS
+' ==========================================
+
+' 1. Interações Iniciais dos Atores com o Frontend
+cli -down- ui : " 1: interagirComPlataforma() ▼ "
+adm -down- ui : " 1*: gerenciarOperacoes() ▼ "
+
+' 2. Fluxos Indiretos (Módulos Satélites)
+ui -left- mod_auth : " 2a: [UC01, UC02, UC03] Autenticar/Cadastrar ◀ "
+ui -up- mod_frota : " 2b: [UC04, UC05, UC06] Visualizar/Manter Frota ▲ "
+
+' 3. Fluxo Principal Completo (Locação e Pagamento)
+ui -right- ctrl : " 2: [UC07] solicitarReserva(dto) ▶ "
+ctrl -down- svc : " 3: criarPedidoReserva() ▼ "
+svc -right- pag : " 4: [UC09] processarFaturamento() ▶ "
+pag -up- gateway : " 4.1: autorizarCartao/Pix() ▲ "
+
+' 4. Convergência para a Camada de Dados (Persistência)
+mod_auth -down- db : " 3a: atualizarUsuarios() ▼ "
+mod_frota -down- db : " 3b: atualizarEstoque() ▼ "
+svc -down- db : " 5: [UC10, UC11, UC12] persistirContrato/CheckIn ▼ "
+
+@enduml

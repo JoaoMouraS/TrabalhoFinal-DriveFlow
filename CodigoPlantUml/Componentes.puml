@@ -1,0 +1,131 @@
+@startuml 
+
+skinparam defaultTextAlignment center 
+
+skinparam componentStyle rectangle 
+
+skinparam packageStyle rectangle 
+
+  
+
+package "Camada de Apresentação (Frontend Client)" { 
+
+    [Componentes Visuais React SPA] as front_modules 
+
+} 
+
+  
+
+() "End-points REST (HTTPS/JSON)" as REST_API 
+
+  
+
+package "Camada de Aplicação (Backend Monolítico Spring Boot)" { 
+
+    package "Módulo de Controladores (API)" { 
+
+        [AuthController] as auth_ctrl 
+
+        [VehicleController] as veh_ctrl 
+
+        [RentalController] as rent_ctrl 
+
+    } 
+
+     
+
+    () "Interfaces de Serviço (Regras de Negócio)" as Service_IF 
+
+     
+
+    package "Módulo de Serviços" { 
+
+        [AutenticacaoService] as auth_svc 
+
+        [FrotaService] as veh_svc 
+
+        [LocacaoService] as rent_svc 
+
+    } 
+
+     
+
+    () "Interfaces de Persistência (Spring Data JPA)" as Repo_IF 
+
+     
+
+    package "Módulo de Repositórios" { 
+
+        [UsuarioRepository] as auth_repo 
+
+        [VeiculoRepository] as veh_repo 
+
+        [ReservaRepository] as rent_repo 
+
+    } 
+
+} 
+
+  
+
+() "Driver JDBC (SQL / ORM)" as JDBC_API 
+
+  
+
+package "Camada de Dados (Data Tier)" { 
+
+    [SGBD Relacional (PostgreSQL)] as postgres_db 
+
+} 
+
+  
+
+front_modules --( REST_API 
+
+REST_API -down- auth_ctrl 
+
+REST_API -down- veh_ctrl 
+
+REST_API -down- rent_ctrl 
+
+  
+
+auth_ctrl --( Service_IF 
+
+veh_ctrl --( Service_IF 
+
+rent_ctrl --( Service_IF 
+
+Service_IF -down- auth_svc 
+
+Service_IF -down- veh_svc 
+
+Service_IF -down- rent_svc 
+
+  
+
+auth_svc --( Repo_IF 
+
+veh_svc --( Repo_IF 
+
+rent_svc --( Repo_IF 
+
+Repo_IF -down- auth_repo 
+
+Repo_IF -down- veh_repo 
+
+Repo_IF -down- rent_repo 
+
+  
+
+auth_repo --( JDBC_API 
+
+veh_repo --( JDBC_API 
+
+rent_repo --( JDBC_API 
+
+JDBC_API -down- postgres_db 
+
+  
+
+@enduml 

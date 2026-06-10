@@ -1,0 +1,201 @@
+@startuml 
+
+skinparam classAttributeIconSize 0 
+
+skinparam defaultTextAlignment center 
+
+skinparam shadowing false 
+
+skinparam roundcorner 5 
+
+skinparam class { 
+
+    BackgroundColor White 
+
+    ArrowColor #333333 
+
+    BorderColor #555555 
+
+} 
+
+  
+
+abstract class Usuario << (A,#ADD8E6) >> { 
+
+  - id : Long 
+
+  - nome : String 
+
+  - email : String 
+
+  - senha : String 
+
+  - telefone : String 
+
+  + login(email: String, senha: String) : Boolean 
+
+} 
+
+  
+
+class Cliente << (C,#DFE8CD) >> { 
+
+  - cnh : String 
+
+  - dataCadastro : LocalDate 
+
+  + solicitarReserva(veiculo: Veiculo, dataInicio: LocalDate, dataFim: LocalDate) : Reserva 
+
+  + cancelarReserva(reserva: Reserva) : Boolean 
+
+} 
+
+  
+
+class Administrador << (C,#DFE8CD) >> { 
+
+  - matricula : String 
+
+  + cadastrarVeiculo(veiculo: Veiculo) : Boolean 
+
+  + registrarDevolucao(reserva: Reserva, kmFinal: Double) : Boolean 
+
+} 
+
+  
+
+class Veiculo << (C,#DFE8CD) >> { 
+
+  - id : Long 
+
+  - placa : String 
+
+  - modelo : String 
+
+  - marca : String 
+
+  - precoDiaria : Double 
+
+  + atualizarStatus(novoStatus: StatusVeiculo) : Boolean 
+
+  + calcularManutencao() : Boolean 
+
+} 
+
+  
+
+class Reserva << (C,#DFE8CD) >> { 
+
+  - id : Long 
+
+  - dataInicio : LocalDate 
+
+  - dataFim : LocalDate 
+
+  - valorTotal : Double 
+
+  + alterarStatus(novoStatus: StatusReserva) : void 
+
+  + associarPagamento(pagamento: Pagamento) : void 
+
+} 
+
+  
+
+class Pagamento << (C,#DFE8CD) >> { 
+
+  - id : Long 
+
+  - valor : Double 
+
+  - dataHora : LocalDateTime 
+
+  + processarPagamento() : Boolean 
+
+  + estornarPagamento() : Boolean 
+
+} 
+
+  
+
+enum StatusVeiculo << (E,#FFDAB9) >> { 
+
+  DISPONIVEL 
+
+  ALUGADO 
+
+  MANUTENCAO 
+
+} 
+
+  
+
+enum StatusReserva << (E,#FFDAB9) >> { 
+
+  PENDENTE 
+
+  CONFIRMADA 
+
+  EM_ANDAMENTO 
+
+  FINALIZADA 
+
+  CANCELADA 
+
+} 
+
+  
+
+enum MetodoPagamento << (E,#FFDAB9) >> { 
+
+  CARTAO_CREDITO 
+
+  CARTAO_DEBITO 
+
+  PIX 
+
+  BOLETO 
+
+} 
+
+  
+
+enum StatusPagamento << (E,#FFDAB9) >> { 
+
+  PENDENTE 
+
+  APROVADO 
+
+  RECUSADO 
+
+  ESTORNADO 
+
+} 
+
+  
+
+Usuario <|-- Cliente 
+
+Usuario <|-- Administrador 
+
+  
+
+Cliente "1" -- "0..*" Reserva : > realiza 
+
+Veiculo "1" -- "0..*" Reserva : < alocado em 
+
+Reserva "1" -- "0..1" Pagamento : > possui 
+
+  
+
+Veiculo ..> StatusVeiculo 
+
+Reserva ..> StatusReserva 
+
+Pagamento ..> MetodoPagamento 
+
+Pagamento ..> StatusPagamento 
+
+  
+
+@enduml 

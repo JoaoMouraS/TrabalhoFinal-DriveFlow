@@ -1,0 +1,95 @@
+@startuml
+skinparam maxmessagesize 200
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 30
+skinparam autonumber 1
+
+' Configuração de Cores e Estilo
+skinparam sequence {
+    ArrowColor #333333
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor #FFFFFF
+    ParticipantBorderColor #555555
+    ParticipantBackgroundColor #F8F8F8
+    GroupBackgroundColor #F0F0F0
+}
+
+actor "Usuário (Cliente/Admin)" as user
+box "Camada de Apresentação" #LightSteelBlue
+    participant "Interface React\n(Frontend)" as ui
+end box
+
+box "Camada de Aplicação" #LightGray
+    participant "Controladores & Serviços\n(Spring Boot Backend)" as backend
+end box
+
+box "Camada de Dados" #LightYellow
+    database "SGBD\n(PostgreSQL)" as db
+end box
+
+' --- MÓDULO 01: GESTÃO DE ACESSO E PERFIL ---
+== Fluxos de Autenticação e Usuário (UC-01, UC-02, UC-03) ==
+
+user -> ui : Realizar Login / Cadastro / Edição
+activate ui #FF66B2
+ui -> backend : Enviar requisição (Auth/Customer DTO)
+activate backend #FF66B2
+backend -> db : Validar credenciais / Persistir dados
+activate db #FF66B2
+db --> backend : Retorno da operação (Sucesso/Falha)
+deactivate db
+backend --> ui : Resposta HTTP (200 OK / 201 Created / JWT Token)
+ui --> user : Atualizar interface e conceder acesso
+deactivate backend
+deactivate ui
+
+' --- MÓDULO 02: GESTÃO DE FROTA ---
+== Fluxos de Gestão de Frota (UC-04, UC-05, UC-06) ==
+
+user -> ui : Consultar Catálogo / Manter Veículos / Manutenção
+activate ui #FF66B2
+ui -> backend : GET/POST/PATCH /api/vehicles
+activate backend #FF66B2
+backend -> db : Consultar estoque / Atualizar status veículo
+activate db #FF66B2
+db --> backend : Dados dos veículos / Confirmação
+deactivate db
+backend --> ui : JSON com dados da frota
+ui --> user : Renderizar lista de carros ou confirmação de alteração
+deactivate backend
+deactivate ui
+
+' --- MÓDULO 03: OPERAÇÕES DE RESERVA ---
+== Fluxos de Reserva e Pagamento (UC-07, UC-08, UC-09) ==
+
+user -> ui : Solicitar Reserva / Cancelar / Pagar
+activate ui #FF66B2
+ui -> backend : Iniciar processo de reserva/pagamento (DTO)
+activate backend #FF66B2
+backend -> backend : Validar disponibilidade e calcular valores
+backend -> db : Registrar Reserva (PENDENTE) / Salvar Pagamento
+activate db #FF66B2
+db --> backend : Confirmação de registro
+deactivate db
+backend --> ui : Comprovante de Reserva / Status Pagamento
+ui --> user : Exibir Voucher ou Erro de Disponibilidade
+deactivate backend
+deactivate ui
+
+' --- MÓDULO 04: OPERAÇÕES ADMINISTRATIVAS (BALCÃO) ---
+== Fluxos Operacionais de Balcão e Relatórios (UC-10, UC-11, UC-12) ==
+
+user -> ui : Realizar Check-out / Check-in / Gerar Relatórios
+activate ui #FF66B2
+ui -> backend : Enviar dados de vistoria ou filtros de relatório
+activate backend #FF66B2
+backend -> db : Atualizar contratos / Agregação de faturamento (SQL)
+activate db #FF66B2
+db --> backend : Dados processados / Status atualizado
+deactivate db
+backend --> ui : PDF/JSON de Relatório ou Status Finalizado
+ui --> user : Exibir sucesso da operação / Download de Relatório
+deactivate backend
+deactivate ui
+
+@enduml

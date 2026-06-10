@@ -1,0 +1,41 @@
+@startuml 
+
+skinparam defaultTextAlignment center 
+
+skinparam packageStyle rectangle 
+
+skinparam componentStyle rectangle 
+
+title Arquitetura em 3 Camadas - DriveFlow 
+
+node "Frontend Client" as front_tier { 
+
+    component "Navegador Web / SPA -\nReact/HTML5" as frontend 
+
+} 
+
+node "Backend Server" as back_tier { 
+
+    component "Controller API - Rotas\nHTTP / JSON REST" as controller 
+
+    component "Camada de Servico -\nRegras de Negocio" as service 
+
+    component "Camada de Acesso a Dados\n/ Repositorios" as repository 
+
+    controller -down-> service 
+
+    service -down-> repository 
+
+} 
+
+node "Data Tier" as data_tier { 
+
+    database "SGBD Relacional -\nPostgreSQL/MySQL" as db 
+
+} 
+
+frontend -down-> controller : HTTPS / JSON 
+
+repository -down-> db : SQL / ORM 
+
+@enduml 

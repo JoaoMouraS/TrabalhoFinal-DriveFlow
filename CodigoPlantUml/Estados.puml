@@ -1,0 +1,73 @@
+@startuml DriveFlow_Diagrama_Estados
+' Configurações de layout para máxima legibilidade e sem sobreposição
+left to right direction
+skinparam nodesep 60
+skinparam ranksep 90
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam state {
+    BackgroundColor White
+    ArrowColor #333333
+    BorderColor #555555
+}
+skinparam note {
+    BackgroundColor White
+    BorderColor #555555
+}
+
+title Diagrama de Estados Completo: Ciclo de Vida da Reserva (DriveFlow)
+
+' Início do Fluxo
+[*] --> AguardandoPagamento : solicitarReserva()
+
+' Estado 1
+state AguardandoPagamento
+AguardandoPagamento : entry / registrarLogInicial()
+AguardandoPagamento : do / aguardarAcaoCliente()
+
+AguardandoPagamento --> Validacao : processarPagamento()
+AguardandoPagamento --> Cancelada : cancelarReserva() [pelo Cliente]
+
+' Nó de Decisão (Gateway de Pagamento)
+state Validacao <<choice>>
+note bottom of Validacao
+  Validação de saldo
+  e fraude via Gateway
+  Externo.
+end note
+
+Validacao --> Confirmada : [pagamentoAprovado]
+Validacao --> Cancelada : [pagamentoRecusado]
+
+' Estado 2
+state Confirmada
+Confirmada : entry / notificarCliente()
+Confirmada : do / alocarVeiculoEstoque()
+Confirmada : exit / emitirVoucher()
+
+Confirmada --> EmAndamento : realizarCheckOut()
+Confirmada --> Cancelada : cancelarReserva() [com antecedência]
+
+' Estado 3
+state EmAndamento
+EmAndamento : entry / registrarSaidaVeiculo()
+EmAndamento : do / monitorarPrazoContrato()
+
+EmAndamento --> Finalizada : realizarCheckIn()
+
+' Estado Final de Sucesso
+state Finalizada
+Finalizada : entry / registrarVistoriaDevolucao()
+Finalizada : do / calcularTaxasExtras()
+Finalizada : exit / arquivarContrato()
+
+' Estado Final de Falha / Desistência
+state Cancelada
+Cancelada : entry / liberarVeiculoEstoque()
+Cancelada : do / processarEstornoSeAplicavel()
+
+' Encerramento do Ciclo
+Finalizada --> [*]
+Cancelada --> [*]
+
+@enduml

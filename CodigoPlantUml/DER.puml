@@ -1,0 +1,65 @@
+@startuml
+' Configurações para um DER limpo (Notação Crow's Foot)
+hide circle
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 80
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam class {
+    BackgroundColor White
+    ArrowColor #333333
+    BorderColor #555555
+}
+
+title Diagrama Entidade-Relacionamento Físico (DER) - DriveFlow
+
+entity "tb_usuarios" as tb_usuarios {
+  * id : BIGINT <<PK>>
+  --
+  * nome : VARCHAR(150)
+  * email : VARCHAR(100)
+  * senha : VARCHAR(255)
+  telefone : VARCHAR(20)
+  * tipo_usuario : VARCHAR(30) <<Discriminator>>
+  cnh : VARCHAR(20)
+  matricula : VARCHAR(20)
+}
+
+entity "tb_veiculos" as tb_veiculos {
+  * id : BIGINT <<PK>>
+  --
+  * placa : VARCHAR(10)
+  * modelo : VARCHAR(60)
+  * marca : VARCHAR(50)
+  * preco_diaria : NUMERIC(10,2)
+  * status : VARCHAR(30)
+}
+
+entity "tb_reservas" as tb_reservas {
+  * id : BIGINT <<PK>>
+  --
+  * cliente_id : BIGINT <<FK>>
+  * veiculo_id : BIGINT <<FK>>
+  * data_inicio : DATE
+  * data_fim : DATE
+  * valor_total : NUMERIC(10,2)
+  * status : VARCHAR(30)
+}
+
+entity "tb_pagamentos" as tb_pagamentos {
+  * id : BIGINT <<PK>>
+  --
+  * reserva_id : BIGINT <<FK>>
+  * valor : NUMERIC(10,2)
+  * data_hora : TIMESTAMP
+  * metodo : VARCHAR(30)
+  * status : VARCHAR(30)
+}
+
+' Relacionamentos (Notação Pé de Galinha)
+tb_usuarios ||--o{ tb_reservas : "1  para  N"
+tb_veiculos ||--o{ tb_reservas : "1  para  N"
+tb_reservas ||--o| tb_pagamentos : "1  para  0..1"
+
+@enduml
