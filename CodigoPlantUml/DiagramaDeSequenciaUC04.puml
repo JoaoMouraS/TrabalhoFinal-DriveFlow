@@ -1,0 +1,36 @@
+@startuml
+actor Administrador as adm
+participant "Interface de Cadastro (Frontend)" as ui
+participant "VehicleController (Backend)" as backend
+database "Banco de Dados (Vehicle DB)" as db
+
+adm -> ui : 1: Preenche dados do veículo e clica em "Salvar"
+activate ui
+
+ui -> backend : 2: POST /api/vehicles (placa, modelo, marca, precoDiaria)
+activate backend
+
+backend -> db : 3: Buscar veículo por placa
+activate db
+db --> backend : Retorna registro se a placa já existir
+deactivate db
+
+backend -> backend : 4: Validar unicidade da placa e regras de negócio
+
+alt [Placa Já Cadastrada]
+    backend --> ui : 400 Bad Request (Erro: Veículo Duplicado)
+    ui --> adm : Exibe mensagem de erro: "Esta placa já está registrada no sistema"
+    
+else [Placa Inédita e Dados Válidos]
+    backend -> db : 5: Salvar novo veículo (Status por padrão: DISPONIVEL)
+    activate db
+    db --> backend : Retorna dados do veículo salvo com ID gerado
+    deactivate db
+    
+    backend --> ui : 201 Created (dadosVeiculo)
+    ui --> adm : Exibe mensagem de sucesso e limpa o formulário de cadastro
+end
+
+deactivate backend
+deactivate ui
+@enduml
