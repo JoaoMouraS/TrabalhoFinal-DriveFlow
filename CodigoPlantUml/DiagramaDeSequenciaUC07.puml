@@ -1,0 +1,44 @@
+@startuml
+skinparam maxmessagesize 150
+
+actor Cliente as cli
+participant "Interface de Reserva (Frontend)" as ui
+participant "RentalController (Backend)" as backend
+database "Banco de Dados" as db
+
+cli -> ui : 1: Seleciona veículo, datas e clica em "Reservar"
+activate ui
+
+ui -> backend : 2: POST /api/rentals (veiculoId, dataInicio, dataFim)
+activate backend
+
+backend -> db : 3: Buscar veículo e verificar disponibilidade
+activate db
+db --> backend : Retorna dados do veículo e status atual
+deactivate db
+
+backend -> backend : 4: Validar disponibilidade para o período
+
+alt [Veículo Disponível]
+    backend -> backend : 5: Calcular valor total e criar Reserva (PENDENTE)
+    
+    backend -> db : 6: Salvar dados da reserva
+    activate db
+    db --> backend : Retorna dados da reserva salva
+    deactivate db
+    
+    backend --> ui : 201 Created (dadosReserva)
+    
+    ui --> cli : Redireciona para a tela de Pagamento
+
+else [Veículo Indisponível]
+    
+    backend --> ui : 400 Bad Request (Erro de Disponibilidade)
+    
+    ui --> cli : Exibe mensagem de erro: "Veículo indisponível no período"
+
+end
+
+deactivate backend
+deactivate ui
+@enduml
