@@ -1,0 +1,54 @@
+@startuml
+skinparam maxmessagesize 150
+skinparam sequenceMessageAlign center
+
+actor Cliente as cli
+participant "InterfaceWeb (React)" as ui
+participant "RentalController" as ctrl
+participant "LocacaoService" as svc
+participant "VeiculoRepository" as vRepo
+participant "ReservaRepository" as rRepo
+database "PostgreSQL (driveflow_db)" as db
+
+title Realização de Projeto: Solicitar Reserva (UC-07)
+
+cli -> ui : 1: Define datas, escolhe veículo e clica em "Reservar"
+activate ui
+
+ui -> ctrl : 2: POST /api/reservas (veiculoId, dataInicio, dataFim)
+activate ctrl
+
+ctrl -> svc : 3: criarReserva(dto)
+activate svc
+
+svc -> vRepo : 4: findById(dto.veiculoId)
+activate vRepo
+vRepo -> db : 5: SELECT * FROM tb_veiculos WHERE id = ?
+db --> vRepo : Registro do veículo
+vRepo --> svc : Optional<Veiculo>
+deactivate vRepo
+
+svc -> svc : 6: verificarDisponibilidade() e calcularValorTotal()
+
+alt [Veículo Disponível]
+    svc -> rRepo : 7: save(novaReserva)
+    activate rRepo
+    rRepo -> db : 8: INSERT INTO tb_reservas (...)
+    db --> rRepo : Confirmação e ID gerado
+    rRepo --> svc : Reserva salva
+    deactivate rRepo
+    
+    svc --> ctrl : Reserva criada com sucesso (Status: PENDENTE)
+    ctrl --> ui : 201 Created (ReservaDTO)
+    ui --> cli : Redireciona para a tela de Pagamento
+    
+else [Veículo Indisponível / Choque de Datas]
+    svc --> ctrl : Lança exceção VeiculoIndisponivelException
+    ctrl --> ui : 400 Bad Request (Mensagem de Erro)
+    ui --> cli : Exibe na tela: "Veículo indisponível para o período"
+end
+
+deactivate svc
+deactivate ctrl
+deactivate ui
+@enduml

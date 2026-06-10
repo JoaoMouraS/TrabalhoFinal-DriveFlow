@@ -1,0 +1,23 @@
+@startuml DSS_UC04_ManterVeiculo
+skinparam sequenceMessageAlign center
+
+actor Administrador as adm
+participant "Sistema DriveFlow" as sys
+
+title Diagrama de Sequência do Sistema: Manter Veículos (UC-04)
+
+activate adm
+adm -> sys : 1: Solicita inclusão de novo veículo (dados do carro)
+activate sys
+
+sys -> sys : verificarUnicidadePlaca()
+
+alt [Placa Inédita]
+    sys --> adm : 2: Confirmação de cadastro com sucesso (Status: 201 Created)
+else [Placa Já Cadastrada]
+    sys --> adm : 3: Retorna erro "Veículo com placa já existente" (Status: 400)
+end
+
+deactivate sys
+deactivate adm
+@enduml
